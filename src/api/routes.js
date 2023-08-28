@@ -1,4 +1,4 @@
-const PROJECT = ""
+const PROJECT = "bi-part"
 const LOCAL_PORT = "3021"
 const API_PRODUCTION_ADDRESS = "https://api-prod.nekoadmin.com.ar"
 let host = ""
