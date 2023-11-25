@@ -1,0 +1,52 @@
+@keyframes animatedButtonTrue {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(-90deg);
+    }
+}
+
+@keyframes animatedButtonFalse {
+    from {
+        transform: rotate(-90deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+.animated-button-close {
+    animation: animatedButtonFalse 0.5s forwards;
+    font-size: 20px;
+}
+
+.animated-button-open {
+    animation: animatedButtonTrue 0.5s forwards;
+    font-size: 20px;
+}
+
+.animated-button {
+    font-size: 20px;
+}
+
+.sm-animated-button-close {
+    animation: animatedButtonFalse 0.5s forwards;
+    font-size: 10px;
+}
+
+.sm-animated-button-open {
+    animation: animatedButtonTrue 0.5s forwards;
+    font-size: 10px;
+}
+
+.sm-animated-button {
+    font-size: 10px;
+}
+
+.sm-button {
+    font-size: 10px;
+    height: 33px;
+}

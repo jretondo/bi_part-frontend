@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Col, DropdownItem, DropdownMenu, DropdownToggle, Input, InputGroup, InputGroupButtonDropdown } from 'reactstrap';
 
 const ModuleItem = ({ module, changePermission, clientId }) => {
-    console.log('module :>> ', module);
+
     const [permissionGrade, setPermissionGrade] = useState({
         color: "gray",
         text: "Deshabilitado"
@@ -10,7 +10,7 @@ const ModuleItem = ({ module, changePermission, clientId }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
     const changePermissionGrade = (grade) => {
-        console.log('grade :>> ', grade);
+
         switch (grade) {
             case 0:
                 setPermissionGrade({

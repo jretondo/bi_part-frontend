@@ -25,8 +25,8 @@ const UserList = ({
     const [stringSearched, setStringSearched] = useState("")
 
     const {
+        pagesQuantity,
         dataPage,
-        pageObj,
         errorList,
         loadingList
     } = useAxiosGetList(
@@ -123,10 +123,10 @@ const UserList = ({
                         </Button>
                     </Col>
                     <Col>
-                        {!pageObj ? null : <Pagination
+                        {!pagesQuantity ? null : <Pagination
                             page={page}
                             setPage={setPage}
-                            dataPages={pageObj}
+                            pagesQuantity={pagesQuantity}
                         />}
                     </Col>
                 </Row>

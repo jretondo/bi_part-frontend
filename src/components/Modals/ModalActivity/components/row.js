@@ -12,10 +12,10 @@ const ActivityRow = ({
                 {moment(item.date).format("DD/MM/YYYY HH:m") + "hs"}
             </td>
             <td style={{ textAlign: "center" }}>
-                {item.Admins[0].name + " " + item.Admins[0].lastname}
+                {item.Admin.name + " " + item.Admin.lastname}
             </td>
             <td style={{ textAlign: "center" }}>
-                {item.Admins[0].user}
+                {item.Admin.user}
             </td>
             <td style={{ textAlign: "left" }}>
                 {item.activity_description}

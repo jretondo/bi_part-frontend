@@ -1,29 +1,32 @@
 import API_ROUTES from '../../../../api/routes';
 import { useAxiosGetList } from 'hooks/useAxiosGetList';
 import React, { useEffect, useState } from 'react';
-import ClientRow from './row';
-import { Button, Card, CardBody, CardFooter, CardHeader, Col, Pagination, Row } from 'reactstrap';
+import { Button, Card, CardBody, CardFooter, CardHeader, Col, Collapse, Row } from 'reactstrap';
 import { SearchFormComponent } from 'components/Search/Search1';
-import { TableList } from 'components/Lists/TableList';
+import PrincipalButtonAccordion from 'components/Accordion/ListAccordion/principalButton';
+import SubButtonAccordion from 'components/Accordion/ListAccordion/subButton';
+import ClientDetails from './clientDetails';
+import PaginationComp from '../../../../components/Pagination/Pages';
 
 const ClientsList = ({
-    setClientInfo,
+    setIsLoading,
+    setCommercialClientInfo,
+    setOperativeClientInfo,
     setIsOpenClientForm,
-    setIsLoading
+    setIsOperativeClient
 }) => {
-    const titlesArray = ["Razón Social", "CUIT", "Email", "Cond. IVA", ""]
-    const [list, setList] = useState(<></>)
     const [page, setPage] = useState(1)
     const [refreshList, setRefreshList] = useState(false)
     const [stringSearched, setStringSearched] = useState("")
+    const [activeIds, setActiveIds] = useState([])
+    const [clientsListHtml, setClientsListHtml] = useState(<h3>No hay clientes para mostrar</h3>)
 
     const {
+        pagesQuantity,
         dataPage,
-        pageObj,
-        errorList,
         loadingList
     } = useAxiosGetList(
-        API_ROUTES.clientsDir.clients,
+        API_ROUTES.commercialClientsDir.commercialClients,
         page, refreshList, [{ query: stringSearched }]
     )
 
@@ -31,50 +34,99 @@ const ClientsList = ({
         setIsLoading(loadingList)
     }, [loadingList, setIsLoading])
 
-    useEffect(() => {
-        if (errorList) {
-            setList(
-                <tr style={{ textAlign: "center", width: "100%" }}>
-                    <td> <span style={{ textAlign: "center", marginRight: "auto", marginLeft: "auto" }}> No hay clientes cargados</span></td>
-                </tr>
-            )
-        } else {
-            setList(
-                dataPage.map((client, key) => {
-                    let first
-                    if (key === 0) {
-                        first = true
-                    } else {
-                        first = false
-                    }
-                    return (
-                        <ClientRow
-                            key={key}
-                            id={key}
-                            client={client}
-                            first={first}
-                            page={page}
-                            setClientInfo={setClientInfo}
-                            setIsOpenClientForm={setIsOpenClientForm}
-                            setPage={setPage}
-                            refreshToggle={() => setRefreshList(!refreshList)}
+    const modulesBuilder = (clientsList, parentId, level, isParentOpen, isOperative) => {
+        let bgColor = "#AD9CFF"
+        switch (level) {
+            case 1:
+                bgColor = "#AD9CFF"
+                break;
+            case 2:
+                bgColor = "#7E88E0"
+                break;
+            default:
+                bgColor = "#e6e6e6"
+                break;
+        }
+        return clientsList.map((client, key) => {
+            return <div key={key}>
+                {!isOperative ?
+                    <div key={key}>
+                        <PrincipalButtonAccordion
+                            name={`${client.business_name} (${client.document_number})`}
+                            key={client.id}
+                            id={client.id}
+                            open={(activeIds.includes(client.id))}
+                            setActiveId={setActiveIds}
+                            hasSub={true}
+                            openNewForm={() => {
+                                setOperativeClientInfo(false)
+                                setIsOperativeClient(true)
+                                setCommercialClientInfo(client)
+                                setIsOpenClientForm(true)
+                            }}
+                            setClientInfo={setCommercialClientInfo}
+                            openUpdate={() => {
+                                setIsOperativeClient(false)
+                                setCommercialClientInfo(client)
+                                setIsOpenClientForm(true)
+                            }}
+                            refresh={() => setRefreshList(!refreshList)}
                         />
-                    )
-                })
-            )
-        }
-        return () => {
-            setList(<></>)
-        }
+                        <Collapse isOpen={activeIds.includes(client.id)} key={key}>
+                            <ClientDetails
+                                client={client}
+                                isCommercialClient={true}
+                                bgColor={bgColor}
+                            />
+                        </Collapse>
+                        {(client.OperativeClients && client.OperativeClients.length > 0 && isParentOpen) && modulesBuilder(client.OperativeClients, client.id, (level + 1), activeIds.includes(client.id), true)}
+                    </div> :
+                    <Collapse isOpen={activeIds.includes(parentId)} key={key}>
+                        <SubButtonAccordion
+                            level={level}
+                            name={`${client.business_name} (${client.document_number})`}
+                            key={client.id}
+                            id={client.id}
+                            open={activeIds.includes(client.id)}
+                            setActiveId={setActiveIds}
+                            setClientInfo={setCommercialClientInfo}
+                            setIsOperativeClient={setIsOperativeClient}
+                            hasSub={true}
+                            bgColor={bgColor}
+                            openUpdate={() => {
+                                setIsOperativeClient(true)
+                                setOperativeClientInfo(client)
+                                setIsOpenClientForm(true)
+                            }}
+                            refresh={() => setRefreshList(!refreshList)}
+                        />
+                        <Collapse isOpen={activeIds.includes(client.id)} key={key}>
+                            <ClientDetails
+                                bgColor={bgColor}
+                                width={"90%"}
+                                client={client}
+                                isCommercialClient={false}
+                            />
+                        </Collapse>
+                    </Collapse>
+                }
+            </div>
+        })
+    }
+
+
+    useEffect(() => {
+        dataPage.length > 0 && setClientsListHtml(modulesBuilder(dataPage, false, 0, true, false))
+        dataPage.length === 0 && setClientsListHtml(<h3>No hay clientes para mostrar</h3>)
         // eslint-disable-next-line
-    }, [dataPage, errorList, loadingList])
+    }, [dataPage, activeIds])
 
     return (
         <Card>
             <CardHeader className="border-0">
                 <Row>
                     <Col md="4" >
-                        <h2 className="mb-0">Lista de Empresas</h2>
+                        <h2 className="mb-0">Lista de Clientes</h2>
                     </Col>
                     <Col md="8" style={{ textAlign: "right" }}>
                         <SearchFormComponent
@@ -82,21 +134,13 @@ const ClientsList = ({
                             stringSearched={stringSearched}
                             setRefreshList={setRefreshList}
                             refreshList={refreshList}
-                            title="Buscar una empresa"
+                            title="Buscar un cliente"
                         />
                     </Col>
                 </Row>
             </CardHeader>
             <CardBody>
-                <Row>
-                    <Col>
-                        <TableList
-                            titlesArray={titlesArray}
-                        >
-                            {list}
-                        </TableList>
-                    </Col>
-                </Row>
+                {clientsListHtml}
             </CardBody>
             <CardFooter>
                 <Row>
@@ -105,18 +149,19 @@ const ClientsList = ({
                             color="primary"
                             onClick={e => {
                                 e.preventDefault();
-                                setClientInfo(false)
+                                setIsOperativeClient(false)
+                                setCommercialClientInfo(false)
                                 setIsOpenClientForm(true);
                             }}
                         >
-                            Nuevo Cliente
+                            Nuevo Cliente Comercial
                         </Button>
                     </Col>
                     <Col>
-                        {!pageObj ? null : <Pagination
+                        {<PaginationComp
                             page={page}
                             setPage={setPage}
-                            dataPages={pageObj}
+                            pagesQuantity={pagesQuantity}
                         />}
                     </Col>
                 </Row>

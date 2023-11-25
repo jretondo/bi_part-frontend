@@ -32,7 +32,8 @@ export const useAxiosGetList = (url, page, refresh, queries) => {
                     if (res.data.body.items) {
                         if (res.data.body.totalItems > 0) {
                             setDataPage(res.data.body.items)
-                            setPagesQuantity(res.data.body.pagesQuantity)
+                            const pageQ = Math.ceil(res.data.body.totalItems / res.data.body.itemsPerPage)
+                            setPagesQuantity(pageQ)
                         } else {
                             setErrorList("No hay datos para mostrar")
                         }

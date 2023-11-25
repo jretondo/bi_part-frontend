@@ -24,7 +24,7 @@ const Header = ({
         modal,
         [{ query: "" }]
     )
-    console.log('dataPage :>> ', dataPage);
+
     return (
         <Row>
             <Col md="4">

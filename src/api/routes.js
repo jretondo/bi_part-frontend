@@ -17,7 +17,8 @@ const routes = host + "/routes"
 const permissions = host + "/permissions"
 const users = host + "/user"
 const activity = host + "/activity"
-const clients = host + "/clients"
+const commercialClients = host + "/commercialClients"
+const operativeClients = host + "/operativeClients"
 const certificates = host + "/certificates"
 
 const authDir = {
@@ -46,11 +47,19 @@ const usersDir = {
     }
 }
 
-const clientsDir = {
-    clients,
+const commercialClientsDir = {
+    commercialClients,
     sub: {
-        dataTax: clients + "/dataTax",
-        dataTaxProof: clients + "/dataTaxProof"
+        dataTax: commercialClients + "/dataTax",
+        dataTaxProof: commercialClients + "/dataTaxProof"
+    }
+}
+
+const operativeClientsDir = {
+    operativeClients,
+    sub: {
+        dataTax: operativeClients + "/dataTax",
+        dataTaxProof: operativeClients + "/dataTaxProof"
     }
 }
 
@@ -83,8 +92,9 @@ const API_ROUTES = {
     permissionsDir,
     usersDir,
     activityDir,
-    clientsDir,
-    certificatesDir
+    commercialClientsDir,
+    certificatesDir,
+    operativeClientsDir
 }
 
 export default API_ROUTES

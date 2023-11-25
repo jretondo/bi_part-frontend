@@ -63,7 +63,7 @@ const PaginationComp = ({
         setLayoutPages(layOut)
     }
 
-    if (pagesQuantity > 1) {
+    if (pagesQuantity) {
         return (
             <>
                 <nav aria-label="...">

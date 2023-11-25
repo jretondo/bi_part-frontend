@@ -9,7 +9,9 @@ import ClientsList from './list';
 
 const ClientsModule = () => {
     const [isOpenClientForm, setIsOpenClientForm] = useState(false)
-    const [clientInfo, setClientInfo] = useState(false)
+    const [commercialClientInfo, setCommercialClientInfo] = useState(false)
+    const [operativeClientInfo, setOperativeClientInfo] = useState(false)
+    const [isOperativeClient, setIsOperativeClient] = useState(false)
 
     const { setUrlRoute } = useContext(secureContext)
     const { setIsLoading } = useContext(loadingContext)
@@ -25,14 +27,18 @@ const ClientsModule = () => {
                 {
                     isOpenClientForm ?
                         <ClientsForm
-                            clientInfo={clientInfo}
-                            setIsOpenClientForm={setIsOpenClientForm}
                             setIsLoading={setIsLoading}
+                            isOperativeClient={isOperativeClient}
+                            commercialClientInfo={commercialClientInfo}
+                            operativeClientInfo={operativeClientInfo}
+                            setIsOpenClientForm={setIsOpenClientForm}
                         /> :
                         <ClientsList
-                            setClientInfo={setClientInfo}
-                            setIsOpenClientForm={setIsOpenClientForm}
                             setIsLoading={setIsLoading}
+                            setCommercialClientInfo={setCommercialClientInfo}
+                            setOperativeClientInfo={setOperativeClientInfo}
+                            setIsOpenClientForm={setIsOpenClientForm}
+                            setIsOperativeClient={setIsOperativeClient}
                         />
                 }
             </Container>

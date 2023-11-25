@@ -19,10 +19,10 @@ const CertificatesList = ({
     const [stringSearched, setStringSearched] = useState("")
 
     const {
+        pagesQuantity,
         dataPage,
-        pageObj,
-        errorList,
-        loadingList
+        loadingList,
+        errorList
     } = useAxiosGetList(
         API_ROUTES.certificatesDir.certificates,
         page, refreshList, [{ query: stringSearched }]
@@ -126,10 +126,10 @@ const CertificatesList = ({
                         </Button>
                     </Col>
                     <Col>
-                        {!pageObj ? null : <Pagination
+                        {!pagesQuantity ? null : <Pagination
                             page={page}
                             setPage={setPage}
-                            dataPages={pageObj}
+                            pagesQuantity={pagesQuantity}
                         />}
                     </Col>
                 </Row>
