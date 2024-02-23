@@ -39,9 +39,7 @@ const ComercialClientsForm = ({
     const [dataInfoToolTip, setDataInfoToolTip] = useState(false)
     const [isMono, setIsMono] = useState(false)
     const [isLegalPerson, setIsLegalPerson] = useState(false)
-    const [team, setTeam] = useState(commercialClientInfo ? commercialClientInfo.team : "")
     const [observations, setObservations] = useState(commercialClientInfo ? commercialClientInfo.observations : "")
-    const [type, setType] = useState(commercialClientInfo ? commercialClientInfo.type : 0)
 
     const { newAlert, newActivity } = useContext(AlertsContext)
     const { axiosGetQuery, loadingActions, axiosQueryFile, axiosPost } = useContext(ActionsBackend)
@@ -59,9 +57,7 @@ const ComercialClientsForm = ({
             city: city,
             activity_description: activity,
             is_legal_person: isLegalPerson,
-            observations: observations,
-            team: team,
-            type: type
+            observations: observations
         }
 
         commercialClientInfo && (dataPost.id = commercialClientInfo.id)
@@ -285,7 +281,7 @@ const ComercialClientsForm = ({
                         </Col>
                     </Row>
                     <Row>
-                        <Col md="4">
+                        <Col md="8">
                             <FormGroup>
                                 <Label for="emailTxt">Email</Label>
                                 <Input
@@ -298,7 +294,7 @@ const ComercialClientsForm = ({
                                 />
                             </FormGroup>
                         </Col>
-                        <Col md="3">
+                        <Col md="4">
                             <FormGroup>
                                 <Label for="phoneTxt">Telefóno</Label>
                                 <Input
@@ -309,28 +305,6 @@ const ComercialClientsForm = ({
                                     value={phone}
                                     onChange={e => setPhone(e.target.value)}
                                 />
-                            </FormGroup>
-                        </Col>
-                        <Col md="3">
-                            <FormGroup>
-                                <Label for="teamTxt">Equipo</Label>
-                                <Input
-                                    id="teamTxt"
-                                    type="text"
-                                    placeholder="Equipo del cliente..."
-                                    value={team}
-                                    onChange={e => setTeam(e.target.value)} />
-                            </FormGroup>
-                        </Col>
-                        <Col md="2">
-                            <FormGroup>
-                                <Label for="balanceBool">Tipo de Cliente</Label>
-                                <Input id="balanceBool" type="select" value={type} onChange={e => setType(e.target.value)}>
-                                    <option value={0}>Mensual</option>
-                                    <option value={1}>Eventual</option>
-                                    <option value={2}>Inactivo</option>
-                                    <option value={3}>Consultoria</option>
-                                </Input>
                             </FormGroup>
                         </Col>
                     </Row>

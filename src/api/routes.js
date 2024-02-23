@@ -20,6 +20,13 @@ const activity = host + "/activity"
 const commercialClients = host + "/commercialClients"
 const operativeClients = host + "/operativeClients"
 const certificates = host + "/certificates"
+const teams = host + "/team"
+const monotributoType = host + "/monotributoType"
+const vatRanking = host + "/vatRanking"
+const socialSecurity = host + "/socialSecurity"
+const grossIncomes = host + "/grossIncome"
+const serviceType = host + "/serviceType"
+const clientType = host + "/clientType"
 
 const authDir = {
     auth
@@ -71,6 +78,38 @@ const certificatesDir = {
     }
 }
 
+const teamsDir = {
+    teams,
+    sub: {
+        details: teams + "/details",
+        permissions: teams + "/permissions"
+    }
+}
+
+const monotributoTypeDir = {
+    monotributoType
+}
+
+const vatRankingDir = {
+    vatRanking
+}
+
+const socialSecurityDir = {
+    socialSecurity
+}
+
+const grossIncomesDir = {
+    grossIncomes
+}
+
+const serviceTypeDir = {
+    serviceType
+}
+
+const clientTypeDir = {
+    clientType
+}
+
 const routesDir = {
     routes,
     sub: {
@@ -94,7 +133,14 @@ const API_ROUTES = {
     activityDir,
     commercialClientsDir,
     certificatesDir,
-    operativeClientsDir
+    operativeClientsDir,
+    teamsDir,
+    monotributoTypeDir,
+    vatRankingDir,
+    socialSecurityDir,
+    grossIncomesDir,
+    serviceTypeDir,
+    clientTypeDir
 }
 
 export default API_ROUTES

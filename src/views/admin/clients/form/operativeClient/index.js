@@ -1,4 +1,4 @@
-import API_ROUTES from '../../../../api/routes';
+import API_ROUTES from '../../../../../api/routes';
 import ActionsBackend from 'context/actionsBackend';
 import AlertsContext from 'context/alerts';
 import { verifyDocumentNumber } from 'function/verifyDocumentNumber';
@@ -21,7 +21,12 @@ import {
     Tooltip
 } from 'reactstrap';
 import 'react-quill/dist/quill.snow.css';
-import InputSearch from '../../../../components/Search/InputSearch';
+import InputSearch from '../../../../../components/Search/InputSearch';
+import TeamInput from './components/team';
+import MonotributistaInput from './components/monotributista';
+import GrossIncomeInput from './components/grossIncome';
+import ServiceTypeInput from './components/serviceType';
+import ClientTypeInput from './components/clientType';
 
 const OperativeClientsForm = ({
     setIsLoading,
@@ -33,16 +38,45 @@ const OperativeClientsForm = ({
     const [documentNumber, setDocumentNumber] = useState(operativeClientInfo ? operativeClientInfo.document_number : "")
     const [isDocumentValid, setIsDocumentValid] = useState(operativeClientInfo ? true : false)
     const [businessName, setBusinessName] = useState(operativeClientInfo ? operativeClientInfo.business_name : "")
-    const [email, setEmail] = useState(operativeClientInfo ? operativeClientInfo.email : "")
     const [ivaConditionId, setIvaConditionId] = useState(operativeClientInfo ? operativeClientInfo.iva_condition_id : 30)
     const [direction, setDirection] = useState(operativeClientInfo ? operativeClientInfo.direction : "")
-    const [phone, setPhone] = useState(operativeClientInfo ? operativeClientInfo.phone : "")
     const [activity, setActivity] = useState(operativeClientInfo ? operativeClientInfo.activity_description : "")
     const [city, setCity] = useState(operativeClientInfo ? operativeClientInfo.city : "")
     const [dataInfoToolTip, setDataInfoToolTip] = useState(false)
     const [isMono, setIsMono] = useState(false)
     const [isLegalPerson, setIsLegalPerson] = useState(operativeClientInfo ? operativeClientInfo.is_legal_person : false)
-    const [hasSocialSecurity, setHasSocialSecurity] = useState(operativeClientInfo ? operativeClientInfo.social_security : false)
+    const [physicalPerson, setPhysicalPerson] = useState(operativeClientInfo ? operativeClientInfo.physical_person : false)
+    const [teamId, setTeamId] = useState(operativeClientInfo ? operativeClientInfo.team_id : "")
+    const [bornDate, setBornDate] = useState(operativeClientInfo ? operativeClientInfo.born_date : "")
+    const [clientType, setClientType] = useState(operativeClientInfo ? operativeClientInfo.client_type : 0)
+
+    const [socialSecurity, setSocialSecurity] = useState({
+        socialSecurity: operativeClientInfo ? operativeClientInfo.social_security : false,
+        hasSocialSecurity: operativeClientInfo ? operativeClientInfo.social_security : false,
+        socialSecurityRank: operativeClientInfo ? operativeClientInfo.social_security_rank : 0,
+    })
+    const [socialSecurityRankingList, setSocialSecurityRankingList] = useState([])
+
+    const [grossIncome, setGrossIncome] = useState({
+        grossIncomeId: operativeClientInfo ? operativeClientInfo.gross_income_id : false,
+        hasGrossIncome: operativeClientInfo ? operativeClientInfo.gross_income_id : false
+    })
+
+    const [domesticService, setDomesticService] = useState({
+        domesticService: operativeClientInfo ? operativeClientInfo.domestic_service : false,
+        hasDomesticService: operativeClientInfo ? operativeClientInfo.domestic_service : false
+    })
+
+    const [serviceSelected, setServiceSelected] = useState(operativeClientInfo ? operativeClientInfo.service : 0)
+
+    const [monotributoType, setMonotributoType] = useState({
+        monotributoTypeId: operativeClientInfo ? operativeClientInfo.monotributo_type_id : false,
+        isMonotributo: operativeClientInfo ? operativeClientInfo.is_monotributo : false
+    })
+
+    const [vatRanking, setVatRanking] = useState(operativeClientInfo ? operativeClientInfo.vat_ranking : 0)
+    const [vatRankingList, setVatRankingList] = useState([])
+
     const [balance, setBalance] = useState(operativeClientInfo ? operativeClientInfo.balance : false)
     const [userSeller, setUserSeller] = useState(operativeClientInfo.Admin ? operativeClientInfo.Admin : "")
     const [userList, setUserList] = useState([])
@@ -54,23 +88,32 @@ const OperativeClientsForm = ({
 
     const newClientPost = async () => {
         const dataPost = {
+            commercial_client_id: commercialClientInfo.id,
             document_type: 80,
             document_number: documentNumber,
             business_name: businessName,
             fantasie_name: businessName,
-            email: email,
+            email: "",
             iva_condition_id: ivaConditionId,
             direction: direction,
-            phone: phone,
+            phone: "",
             city: city,
-            activity_description: activity,
             is_legal_person: isLegalPerson,
-            social_security: hasSocialSecurity,
+            born_date: bornDate,
+            client_type_id: clientType,
+            activity_description: activity,
+            monotributo_type_id: monotributoType.monotributoTypeId,
             balance: balance,
-            observations: observations,
-            commercial_client_id: commercialClientInfo.id,
-            is_mono: isMono,
-            user_id: userSeller.id
+            physical_person: physicalPerson,
+            social_security: socialSecurity.hasSocialSecurity ? socialSecurity.socialSecurity : false,
+            social_security_rank: socialSecurity.socialSecurityRank,
+            gross_income_id: grossIncome.hasGrossIncome ? grossIncome.grossIncomeId : false,
+            vat_rank: vatRanking,
+            domestic_service: domesticService.hasDomesticService ? domesticService.domesticService : false,
+            service_type_id: serviceSelected,
+            user_id: userSeller.id,
+            team_id: teamId,
+            observations: observations
         }
         operativeClientInfo && (dataPost.id = operativeClientInfo.id)
         const response = await axiosPost(API_ROUTES.operativeClientsDir.operativeClients, dataPost)
@@ -99,6 +142,15 @@ const OperativeClientsForm = ({
     const getClientDataTax = async (e) => {
         const documentVerify = verifyDocumentNumber(e.target.value)
         if (documentVerify.isValid) {
+            const lastDigit = parseInt(e.target.value.slice(-1))
+            const vatRanking = vatRankingList.find(item => item.digit === lastDigit)
+            const socialSecurity = socialSecurityRankingList.find(item => item.digit === lastDigit)
+
+            setVatRanking(vatRanking ? vatRanking.rank : 0)
+            setSocialSecurity({
+                ...socialSecurity,
+                socialSecurityRank: socialSecurity ? socialSecurity.rank : 0
+            })
             setIsDocumentValid(true)
             const response = await axiosGetQuery(API_ROUTES.commercialClientsDir.sub.dataTax, [{ documentNumber: documentNumber }])
             try {
@@ -108,6 +160,11 @@ const OperativeClientsForm = ({
                     setBusinessName(response.data.data.datosGenerales.apellido + " " + response.data.data.datosGenerales.nombre)
                     setIsLegalPerson(false)
                 } else {
+                    const fecha = (response.data.data.datosGenerales.fechaContratoSocial).toString().slice(0, 10)
+                    try {
+                        setBornDate(fecha)
+                    } catch (error) {
+                    }
                     setBusinessName(response.data.data.datosGenerales.razonSocial)
                     setIsLegalPerson(true)
                 }
@@ -160,6 +217,24 @@ const OperativeClientsForm = ({
         }
     }
 
+    const getVatRankingList = async () => {
+        const response = await axiosGetQuery(API_ROUTES.vatRankingDir.vatRanking, [])
+        if (!response.error) {
+            setVatRankingList(response.data)
+        } else {
+            newAlert("danger", "Hubo un error!", "Error: " + response.errorMsg)
+        }
+    }
+
+    const getSocialSecurityRankingList = async () => {
+        const response = await axiosGetQuery(API_ROUTES.socialSecurityDir.socialSecurity, [])
+        if (!response.error) {
+            setSocialSecurityRankingList(response.data)
+        } else {
+            newAlert("danger", "Hubo un error!", "Error: " + response.errorMsg)
+        }
+    }
+
     const clientSearchFn = (user, searchedText) => {
         if ((`${user.name} ${user.lastname}`).toLowerCase().includes(searchedText.toLowerCase())) {
             return user
@@ -172,6 +247,8 @@ const OperativeClientsForm = ({
 
     useEffect(() => {
         getUserList()
+        getVatRankingList()
+        getSocialSecurityRankingList()
         // eslint-disable-next-line
     }, [])
 
@@ -200,7 +277,7 @@ const OperativeClientsForm = ({
                     newClientPost();
                 }} >
                     <Row>
-                        <Col md="3">
+                        <Col md="4">
                             <FormGroup>
                                 <Label for="cuitTxt">CUIT</Label>
                                 <InputGroup>
@@ -233,7 +310,7 @@ const OperativeClientsForm = ({
                                 </Tooltip>
                             </FormGroup>
                         </Col>
-                        <Col md="6">
+                        <Col md="8">
                             <FormGroup>
                                 <Label for="businessNameTxt">Razón Social</Label>
                                 <Input
@@ -245,27 +322,36 @@ const OperativeClientsForm = ({
                                     required />
                             </FormGroup>
                         </Col>
-                        <Col md="3">
+                    </Row>
+                    <Row>
+                        <Col md="4">
                             <FormGroup>
-                                <Label for="fantasieTxt">Condición frente al IVA</Label>
-                                <Input
-                                    type="select"
-                                    id="fantasieTxt"
-                                    placeholder="Nombre de fantasía..."
-                                    value={ivaConditionId}
-                                    onChange={e => setIvaConditionId(e.target.value)}
-                                >
-                                    <option value={30}>IVA Responsable Inscripto</option>
-                                    <option value={32}>IVA Sujeto Exento</option>
-                                    <option value={20}>Responsable Monotributo</option>
-                                    <option value={33}>IVA Responsable No Inscripto</option>
-                                    <option value={34}>IVA No Alcanzado</option>
+                                <Label for="personTypeSelect">Tipo de persona</Label>
+                                <Input id="personTypeSelect" type="select" value={isLegalPerson} onChange={e => setIsLegalPerson(e.target.value)}>
+                                    <option value={false}>Física</option>
+                                    <option value={true}>Juridica</option>
                                 </Input>
                             </FormGroup>
                         </Col>
+                        <Col md="3">
+                            <FormGroup>
+                                <Label for="businessNameTxt">{isLegalPerson ? "Fecha Contrato Social" : "Fecha Nacimieno"}</Label>
+                                <Input
+                                    type="date"
+                                    id="bornDateTxt"
+                                    placeholder="Fecha..."
+                                    value={bornDate}
+                                    onChange={e => setBornDate(e.target.value)}
+                                    required />
+                            </FormGroup>
+                        </Col>
+                        <ClientTypeInput
+                            clientType={clientType}
+                            setClientType={setClientType}
+                        />
                     </Row>
                     <Row>
-                        <Col md="8">
+                        <Col md="4">
                             <FormGroup>
                                 <Label for="fantasieTxt">Actividad</Label>
                                 <Input
@@ -277,81 +363,11 @@ const OperativeClientsForm = ({
                                 />
                             </FormGroup>
                         </Col>
-                        <Col md="4">
-                            <FormGroup>
-                                <Label for="personTypeSelect">Tipo de persona</Label>
-                                <Input id="personTypeSelect" type="select" value={isLegalPerson} onChange={e => setIsLegalPerson(e.target.value)}>
-                                    <option value={false}>Física</option>
-                                    <option value={true}>Juridica</option>
-                                </Input>
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md="8">
-                            <FormGroup>
-                                <Label for="directionTxt">Dirección</Label>
-                                <Input
-                                    type="text"
-                                    id="directionTxt"
-                                    placeholder="Dirección del cliente..."
-                                    value={direction}
-                                    onChange={e => setDirection(e.target.value)}
-                                />
-                            </FormGroup>
-                        </Col>
-                        <Col md="4">
-                            <FormGroup>
-                                <Label for="cityTxt">Localidad</Label>
-                                <Input
-                                    type="text"
-                                    id="cityTxt"
-                                    placeholder="Localidad del cliente..."
-                                    value={city}
-                                    onChange={e => setCity(e.target.value)}
-                                />
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md="8">
-                            <FormGroup>
-                                <Label for="emailTxt">Email</Label>
-                                <Input
-                                    type="email"
-                                    name="email"
-                                    id="emailTxt"
-                                    placeholder="Email del cliente..."
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                />
-                            </FormGroup>
-                        </Col>
-                        <Col md="4">
-                            <FormGroup>
-                                <Label for="phoneTxt">Telefóno</Label>
-                                <Input
-                                    type="text"
-                                    name="phone"
-                                    id="phoneTxt"
-                                    placeholder="Telefóno del cliente..."
-                                    value={phone}
-                                    onChange={e => setPhone(e.target.value)}
-                                />
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md="3">
-                            <FormGroup>
-                                <Label for="socialSecurity">Presenta 931</Label>
-                                <Input id="socialSecurity" type="select" value={hasSocialSecurity} onChange={e => setHasSocialSecurity(e.target.value)}>
-                                    <option value={false}>No</option>
-                                    <option value={true}>Si</option>
-                                </Input>
-                            </FormGroup>
-                        </Col>
-                        <Col md="3">
+                        <MonotributistaInput
+                            monotributoType={monotributoType}
+                            setMonotributoType={setMonotributoType}
+                        />
+                        <Col md="2">
                             <FormGroup>
                                 <Label for="balanceBool">Presenta Balance</Label>
                                 <Input id="balanceBool" type="select" value={balance} onChange={e => setBalance(e.target.value)}>
@@ -360,17 +376,119 @@ const OperativeClientsForm = ({
                                 </Input>
                             </FormGroup>
                         </Col>
-                        <Col md="6">
+                        <Col md="2">
+                            <FormGroup>
+                                <Label for="balanceBool">Presenta Persona Fisica</Label>
+                                <Input id="balanceBool" type="select" value={physicalPerson} onChange={e => setPhysicalPerson(e.target.value)}>
+                                    <option value={false}>No</option>
+                                    <option value={true}>Si</option>
+                                </Input>
+                            </FormGroup>
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Col md="4">
+                            <FormGroup>
+                                <Label for="balanceBool">Presenta 931</Label>
+                                <InputGroup>
+                                    <InputGroupAddon addonType="prepend">
+                                        <Button
+                                            color={socialSecurity.hasSocialSecurity ? "success" : "danger"}
+                                            onClick={() =>
+                                                setSocialSecurity({
+                                                    ...socialSecurity,
+                                                    hasSocialSecurity: !socialSecurity.hasSocialSecurity
+                                                })}
+                                        >{socialSecurity.hasSocialSecurity ? "Si" : "No"}
+                                        </Button></InputGroupAddon>
+                                    <Input
+                                        style={{ paddingLeft: "10px", paddingRight: "10px", border: "1px solid" }}
+                                        type="number"
+                                        name="socialSecurityRank"
+                                        id="socialSecurityRankTxt"
+                                        placeholder="Nomina 931..."
+                                        disabled={!socialSecurity.hasSocialSecurity}
+                                        onChange={e => setSocialSecurity({ ...socialSecurity, socialSecurity: e.target.value })}
+                                    />
+                                    <Input
+                                        style={{ paddingLeft: "10px", paddingRight: "10px", border: "1px solid" }}
+                                        type="number"
+                                        name="socialSecurityRank"
+                                        id="socialSecurityRankTxt"
+                                        placeholder="Ranking 931..."
+                                        value={socialSecurity.socialSecurityRank}
+                                        disabled
+                                    />
+                                </InputGroup>
+                            </FormGroup>
+                        </Col>
+                        <GrossIncomeInput
+                            grossIncome={grossIncome}
+                            setGrossIncome={setGrossIncome}
+                        />
+                        <Col md="4">
+                            <FormGroup>
+                                <Label for="balanceBool">Ranking IVA</Label>
+                                <InputGroup>
+                                    <Input
+                                        style={{ paddingLeft: "10px", paddingRight: "10px", border: "1px solid" }}
+                                        type="number"
+                                        name="socialSecurityRank"
+                                        id="socialSecurityRankTxt"
+                                        placeholder="Ranking IVA..."
+                                        value={vatRanking}
+                                        disabled
+                                    />
+                                </InputGroup>
+                            </FormGroup>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md="3">
+                            <FormGroup>
+                                <Label for="balanceBool">Servicio Domestico</Label>
+                                <InputGroup>
+                                    <InputGroupAddon addonType="prepend">
+                                        <Button
+                                            color={domesticService.hasDomesticService ? "success" : "danger"}
+                                            onClick={() =>
+                                                setDomesticService({
+                                                    ...domesticService,
+                                                    hasDomesticService: !domesticService.hasDomesticService
+                                                })}
+                                        >{domesticService.hasDomesticService ? "Si" : "No"}
+                                        </Button></InputGroupAddon>
+                                    <Input
+                                        style={{ paddingLeft: "10px", paddingRight: "10px", border: "1px solid" }}
+                                        type="number"
+                                        name="socialSecurityRank"
+                                        id="socialSecurityRankTxt"
+                                        placeholder="Nomina Servicio Domestico.."
+                                        disabled={!domesticService.hasDomesticService}
+                                    />
+                                </InputGroup>
+                            </FormGroup>
+                        </Col>
+                        <ServiceTypeInput
+                            serviceSelected={serviceSelected}
+                            setServiceSelected={setServiceSelected}
+                        />
+                        <Col md="3">
                             <InputSearch
                                 itemsList={userList}
                                 itemSelected={userSeller}
-                                title={"Usuario a comisionar"}
+                                title={"Responsable Operativo"}
                                 placeholderInput={"Busque un usuario..."}
                                 getNameFn={(user) => `${user.name} ${user.lastname}`}
                                 setItemSelected={setUserSeller}
                                 searchFn={clientSearchFn}
                             />
                         </Col>
+                        <TeamInput
+                            teamId={teamId}
+                            setTeamId={setTeamId}
+                        />
                     </Row>
                     <Row>
                         <Col md="12">
