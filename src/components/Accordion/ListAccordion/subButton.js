@@ -29,7 +29,7 @@ const SubButtonAccordion = ({ id, name, level, setActiveId, open, hasSub, bgColo
 
     const deleteAccount = async () => {
         swal({
-            title: "Eliminar la cuenta " + name + "!",
+            title: "Eliminar al cliente " + name + "!",
             text: "¿Está seguro de eliminar esta cuenta? Esta desición es permanente y se eliminarán todas las sub cuentas.",
             icon: "warning",
             buttons: {
@@ -40,10 +40,10 @@ const SubButtonAccordion = ({ id, name, level, setActiveId, open, hasSub, bgColo
         })
             .then(async (willDelete) => {
                 if (willDelete) {
-                    const response = await axiosDelete(API_ROUTES.accountingDir.sub.accountingChart, id)
+                    const response = await axiosDelete(API_ROUTES.operativeClientsDir.operativeClients, id)
                     if (!response.error) {
-                        newActivity(`Se ha eliminado la cuenta ${name})`)
-                        newAlert("success", "Cuenta eliminada con éxito!", "")
+                        newActivity(`Se ha eliminado al cliente operativo ${name})`)
+                        newAlert("success", "Cliente eliminado con éxito!", "")
                         refresh()
                     } else {
                         newAlert("danger", "Hubo un error!", "Intentelo nuevamente. Error: " + response.errorMsg)

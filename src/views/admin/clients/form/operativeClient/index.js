@@ -48,11 +48,11 @@ const OperativeClientsForm = ({
     const [physicalPerson, setPhysicalPerson] = useState(operativeClientInfo ? operativeClientInfo.physical_person : false)
     const [teamId, setTeamId] = useState(operativeClientInfo ? operativeClientInfo.team_id : "")
     const [bornDate, setBornDate] = useState(operativeClientInfo ? operativeClientInfo.born_date : "")
-    const [clientType, setClientType] = useState(operativeClientInfo ? operativeClientInfo.client_type : 0)
+    const [clientType, setClientType] = useState(operativeClientInfo ? operativeClientInfo.client_type_id : 0)
 
     const [socialSecurity, setSocialSecurity] = useState({
         socialSecurity: operativeClientInfo ? operativeClientInfo.social_security : false,
-        hasSocialSecurity: operativeClientInfo ? operativeClientInfo.social_security : false,
+        hasSocialSecurity: operativeClientInfo.social_security ? true : false,
         socialSecurityRank: operativeClientInfo ? operativeClientInfo.social_security_rank : 0,
     })
     const [socialSecurityRankingList, setSocialSecurityRankingList] = useState([])
@@ -64,17 +64,17 @@ const OperativeClientsForm = ({
 
     const [domesticService, setDomesticService] = useState({
         domesticService: operativeClientInfo ? operativeClientInfo.domestic_service : false,
-        hasDomesticService: operativeClientInfo ? operativeClientInfo.domestic_service : false
+        hasDomesticService: operativeClientInfo.domestic_service ? true : false
     })
 
-    const [serviceSelected, setServiceSelected] = useState(operativeClientInfo ? operativeClientInfo.service : 0)
+    const [serviceSelected, setServiceSelected] = useState(operativeClientInfo ? operativeClientInfo.service_type_id : false)
 
     const [monotributoType, setMonotributoType] = useState({
         monotributoTypeId: operativeClientInfo ? operativeClientInfo.monotributo_type_id : false,
-        isMonotributo: operativeClientInfo ? operativeClientInfo.is_monotributo : false
+        isMonotributo: operativeClientInfo.monotributo_type_id ? true : false
     })
 
-    const [vatRanking, setVatRanking] = useState(operativeClientInfo ? operativeClientInfo.vat_ranking : 0)
+    const [vatRanking, setVatRanking] = useState(operativeClientInfo ? operativeClientInfo.vat_rank : 0)
     const [vatRankingList, setVatRankingList] = useState([])
 
     const [balance, setBalance] = useState(operativeClientInfo ? operativeClientInfo.balance : false)
@@ -87,6 +87,22 @@ const OperativeClientsForm = ({
     const { axiosGetQuery, loadingActions, axiosQueryFile, axiosPost } = useContext(ActionsBackend)
 
     const newClientPost = async () => {
+        if (!clientType) {
+            newAlert("danger", "Hubo un error!", "Debe seleccionar un tipo de cliente!")
+            return
+        }
+        if (!serviceSelected) {
+            newAlert("danger", "Hubo un error!", "Debe seleccionar un tipo de servicio!")
+            return
+        }
+        if (!userSeller) {
+            newAlert("danger", "Hubo un error!", "Debe seleccionar un responsable operativo!")
+            return
+        }
+        if (!teamId) {
+            newAlert("danger", "Hubo un error!", "Debe seleccionar un equipo!")
+            return
+        }
         const dataPost = {
             commercial_client_id: commercialClientInfo.id,
             document_type: 80,
@@ -102,14 +118,14 @@ const OperativeClientsForm = ({
             born_date: bornDate,
             client_type_id: clientType,
             activity_description: activity,
-            monotributo_type_id: monotributoType.monotributoTypeId,
+            monotributo_type_id: monotributoType.isMonotributo ? monotributoType.monotributoTypeId : null,
             balance: balance,
             physical_person: physicalPerson,
-            social_security: socialSecurity.hasSocialSecurity ? socialSecurity.socialSecurity : false,
+            social_security: socialSecurity.hasSocialSecurity ? socialSecurity.socialSecurity : null,
             social_security_rank: socialSecurity.socialSecurityRank,
-            gross_income_id: grossIncome.hasGrossIncome ? grossIncome.grossIncomeId : false,
+            gross_income_id: grossIncome.hasGrossIncome ? grossIncome.grossIncomeId : null,
             vat_rank: vatRanking,
-            domestic_service: domesticService.hasDomesticService ? domesticService.domesticService : false,
+            domestic_service: domesticService.hasDomesticService ? domesticService.domesticService : null,
             service_type_id: serviceSelected,
             user_id: userSeller.id,
             team_id: teamId,
@@ -144,12 +160,12 @@ const OperativeClientsForm = ({
         if (documentVerify.isValid) {
             const lastDigit = parseInt(e.target.value.slice(-1))
             const vatRanking = vatRankingList.find(item => item.digit === lastDigit)
-            const socialSecurity = socialSecurityRankingList.find(item => item.digit === lastDigit)
+            const socialSecurityFind = socialSecurityRankingList.find(item => item.digit === lastDigit)
 
             setVatRanking(vatRanking ? vatRanking.rank : 0)
             setSocialSecurity({
                 ...socialSecurity,
-                socialSecurityRank: socialSecurity ? socialSecurity.rank : 0
+                socialSecurityRank: socialSecurityFind ? socialSecurityFind.rank : 0
             })
             setIsDocumentValid(true)
             const response = await axiosGetQuery(API_ROUTES.commercialClientsDir.sub.dataTax, [{ documentNumber: documentNumber }])
@@ -410,6 +426,7 @@ const OperativeClientsForm = ({
                                         placeholder="Nomina 931..."
                                         disabled={!socialSecurity.hasSocialSecurity}
                                         onChange={e => setSocialSecurity({ ...socialSecurity, socialSecurity: e.target.value })}
+                                        value={socialSecurity.socialSecurity}
                                     />
                                     <Input
                                         style={{ paddingLeft: "10px", paddingRight: "10px", border: "1px solid" }}
@@ -466,6 +483,8 @@ const OperativeClientsForm = ({
                                         id="socialSecurityRankTxt"
                                         placeholder="Nomina Servicio Domestico.."
                                         disabled={!domesticService.hasDomesticService}
+                                        onChange={e => setDomesticService({ ...domesticService, domesticService: e.target.value })}
+                                        value={domesticService.domesticService}
                                     />
                                 </InputGroup>
                             </FormGroup>

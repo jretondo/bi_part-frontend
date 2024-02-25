@@ -56,7 +56,7 @@ const TeamInput = ({
                             value={teamId}
                             onChange={e => setTeamId(e.target.value)}
                         >
-                            <option >Seleccione un equipo...</option>
+                            <option value={false} >Seleccione un equipo...</option>
                             {
                                 teamList.length > 0 && teamList.map((team, index) => {
                                     return (

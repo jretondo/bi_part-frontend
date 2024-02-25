@@ -52,11 +52,12 @@ const ClientTypeInput = ({
                     <Label for="balanceBool">Tipo de Cliente</Label>
                     <InputGroup>
                         <Input
+                            required
                             type="select"
                             value={clientType}
                             onChange={e => setClientType(e.target.value)}
                         >
-                            <option >Seleccione un tipo...</option>
+                            <option value={false} >Seleccione un tipo...</option>
                             {
                                 clientTypeList.length > 0 && clientTypeList.map((clientType, index) => {
                                     return (

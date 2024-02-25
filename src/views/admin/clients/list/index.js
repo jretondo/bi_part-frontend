@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Card, CardBody, CardFooter, CardHeader, Col, Collapse, Row } from 'reactstrap';
 import { SearchFormComponent } from 'components/Search/Search1';
 import PrincipalButtonAccordion from 'components/Accordion/ListAccordion/principalButton';
-import SubButtonAccordion from 'components/Accordion/ListAccordion/subButton';
+import SubButtonAccordion from '../../../../components/Accordion/ListAccordion/subButton';
 import ClientDetails from './clientDetails';
 import PaginationComp from '../../../../components/Pagination/Pages';
 
