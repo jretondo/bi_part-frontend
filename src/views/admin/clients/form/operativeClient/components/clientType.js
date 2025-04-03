@@ -49,7 +49,7 @@ const ClientTypeInput = ({
         <>
             <Col md="5">
                 <FormGroup>
-                    <Label for="balanceBool">Tipo de Cliente</Label>
+                    <Label for="balanceBool">Tipo de Pago</Label>
                     <InputGroup>
                         <Input
                             required
@@ -88,7 +88,7 @@ const ClientTypeInput = ({
             </Col>
             <Modal isOpen={modalOpen} toggle={() => setModalOpen(!modalOpen)}>
                 <ModalHeader>
-                    <h3>Agregar Tipo de Cliente</h3>
+                    <h3>Agregar Tipo de Pago</h3>
                 </ModalHeader>
                 <ModalBody>
                     <FormGroup>
