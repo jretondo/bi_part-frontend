@@ -9,12 +9,14 @@ import {
   Label,
   Modal,
   ModalBody,
+  ModalFooter,
   ModalHeader,
   Tooltip,
 } from 'reactstrap';
 import AlertsContext from '../../../../../../context/alerts';
 import ActionsBackend from '../../../../../../context/actionsBackend';
 import API_ROUTES from '../../../../../../api/routes';
+import { TableList } from '../../../../../../components/Lists/TableList';
 
 const MonotributistaInput = ({
   monotributoType,
@@ -26,9 +28,10 @@ const MonotributistaInput = ({
   const [monotributoDescription, setMonotributoDescription] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [monotributoList, setMonotributoList] = useState([]);
-
+  const [modalOpen2, setModalOpen2] = useState(false);
+  const [tooltipOpen2, setTooltipOpen2] = useState(false);
   const { newAlert, newActivity } = useContext(AlertsContext);
-  const { axiosGetQuery, axiosPost } = useContext(ActionsBackend);
+  const { axiosGetQuery, axiosPost, axiosDelete } = useContext(ActionsBackend);
 
   const createMonotribuType = async () => {
     const response = await axiosPost(
@@ -59,6 +62,20 @@ const MonotributistaInput = ({
     );
     if (!response.error) {
       setMonotributoList(response.data);
+    } else {
+      newAlert('danger', 'Hubo un error!', 'Error: ' + response.errorMsg);
+    }
+  };
+
+  const deleteClientType = async (id) => {
+    const response = await axiosDelete(
+      API_ROUTES.monotributoTypeDir.monotributoType,
+      id,
+    );
+    if (!response.error) {
+      newAlert('success', 'Tipo borrado!', 'El tipo ha sido borrado con éxito');
+      newActivity('El usuario ha borrado un tipo de cliente');
+      getMonotributoTypeList();
     } else {
       newAlert('danger', 'Hubo un error!', 'Error: ' + response.errorMsg);
     }
@@ -127,6 +144,23 @@ const MonotributistaInput = ({
                 Agregar más tipos de monotributo
               </Tooltip>
             </InputGroupAddon>
+            <InputGroupAddon addonType="append">
+              <Button
+                id="deleteClientTypesBtn"
+                color="danger"
+                onClick={() => setModalOpen2(true)}
+              >
+                {<i className="fas fa-trash"></i>}
+              </Button>
+              <Tooltip
+                placement="top"
+                isOpen={tooltipOpen2}
+                target="deleteClientTypesBtn"
+                toggle={() => setTooltipOpen2(!tooltipOpen2)}
+              >
+                Eliminar Tipos
+              </Tooltip>
+            </InputGroupAddon>
           </InputGroup>
         </FormGroup>
       </Col>
@@ -162,6 +196,42 @@ const MonotributistaInput = ({
             Crear tipo
           </Button>
         </ModalBody>
+      </Modal>
+      <Modal
+        isOpen={modalOpen2}
+        toggle={() => setModalOpen2(!modalOpen2)}
+        size="lg"
+      >
+        <ModalHeader>
+          <h3>Borrar Tipos de Monotributo</h3>
+        </ModalHeader>
+        <ModalBody>
+          <TableList titlesArray={['Nombre', 'Descripción', '']}>
+            {monotributoList.map((monotributo, index) => {
+              return (
+                <tr key={index}>
+                  <td style={{ textAlign: 'center' }}>{monotributo.name}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    {monotributo.description}
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <Button
+                      color="danger"
+                      onClick={() => deleteClientType(monotributo.id)}
+                    >
+                      {<i className="fas fa-trash"></i>}
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
+          </TableList>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="danger" onClick={() => setModalOpen2(false)}>
+            Cerrar
+          </Button>
+        </ModalFooter>
       </Modal>
     </>
   );

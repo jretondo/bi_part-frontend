@@ -9,22 +9,26 @@ import {
   Label,
   Modal,
   ModalBody,
+  ModalFooter,
   ModalHeader,
   Tooltip,
 } from 'reactstrap';
 import API_ROUTES from '../../../../../../api/routes';
 import AlertsContext from '../../../../../../context/alerts';
 import ActionsBackend from '../../../../../../context/actionsBackend';
+import { TableList } from '../../../../../../components/Lists/TableList';
 
 const GrossIncomeInput = ({ grossIncome, setGrossIncome, colSize }) => {
   const [grossIncomeList, setGrossIncomeList] = useState([]);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen2, setModalOpen2] = useState(false);
+  const [tooltipOpen2, setTooltipOpen2] = useState(false);
   const [grossIncomeName, setGrossIncomeName] = useState('');
   const [grossIncomeDescription, setGrossIncomeDescription] = useState('');
 
   const { newAlert, newActivity } = useContext(AlertsContext);
-  const { axiosGetQuery, axiosPost } = useContext(ActionsBackend);
+  const { axiosGetQuery, axiosPost, axiosDelete } = useContext(ActionsBackend);
 
   const getGrossIncomeList = async () => {
     const response = await axiosGetQuery(
@@ -51,6 +55,20 @@ const GrossIncomeInput = ({ grossIncome, setGrossIncome, colSize }) => {
       );
       newActivity('El usuario ha creado un nuevo equipo');
       setModalOpen(false);
+      getGrossIncomeList();
+    } else {
+      newAlert('danger', 'Hubo un error!', 'Error: ' + response.errorMsg);
+    }
+  };
+
+  const deleteClientType = async (id) => {
+    const response = await axiosDelete(
+      API_ROUTES.grossIncomesDir.grossIncomes,
+      id,
+    );
+    if (!response.error) {
+      newAlert('success', 'Tipo borrado!', 'El tipo ha sido borrado con éxito');
+      newActivity('El usuario ha borrado un tipo de cliente');
       getGrossIncomeList();
     } else {
       newAlert('danger', 'Hubo un error!', 'Error: ' + response.errorMsg);
@@ -119,6 +137,23 @@ const GrossIncomeInput = ({ grossIncome, setGrossIncome, colSize }) => {
                 Agregar más IIBB
               </Tooltip>
             </InputGroupAddon>
+            <InputGroupAddon addonType="append">
+              <Button
+                id="deleteClientTypesBtn"
+                color="danger"
+                onClick={() => setModalOpen2(true)}
+              >
+                {<i className="fas fa-trash"></i>}
+              </Button>
+              <Tooltip
+                placement="top"
+                isOpen={tooltipOpen2}
+                target="deleteClientTypesBtn"
+                toggle={() => setTooltipOpen2(!tooltipOpen2)}
+              >
+                Eliminar Tipos
+              </Tooltip>
+            </InputGroupAddon>
           </InputGroup>
         </FormGroup>
       </Col>
@@ -152,6 +187,42 @@ const GrossIncomeInput = ({ grossIncome, setGrossIncome, colSize }) => {
             Crear IIBB
           </Button>
         </ModalBody>
+      </Modal>
+      <Modal
+        isOpen={modalOpen2}
+        toggle={() => setModalOpen2(!modalOpen2)}
+        size="lg"
+      >
+        <ModalHeader>
+          <h3>Borrar Tipos de Monotributo</h3>
+        </ModalHeader>
+        <ModalBody>
+          <TableList titlesArray={['Nombre', 'Descripción', '']}>
+            {grossIncomeList.map((grossIncome, index) => {
+              return (
+                <tr key={index}>
+                  <td style={{ textAlign: 'center' }}>{grossIncome.name}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    {grossIncome.description}
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <Button
+                      color="danger"
+                      onClick={() => deleteClientType(grossIncome.id)}
+                    >
+                      {<i className="fas fa-trash"></i>}
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
+          </TableList>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="danger" onClick={() => setModalOpen2(false)}>
+            Cerrar
+          </Button>
+        </ModalFooter>
       </Modal>
     </>
   );

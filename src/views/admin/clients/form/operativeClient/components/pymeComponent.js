@@ -9,6 +9,7 @@ import {
   Label,
   Modal,
   ModalBody,
+  ModalFooter,
   ModalHeader,
   Row,
   Tooltip,
@@ -17,6 +18,7 @@ import AlertsContext from '../../../../../../context/alerts';
 import ActionsBackend from '../../../../../../context/actionsBackend';
 import API_ROUTES from '../../../../../../api/routes';
 import { socialSecurityRankingsCalc } from '../../../../../../function/rankingsCalc';
+import { TableList } from '../../../../../../components/Lists/TableList';
 
 const PymeProductInput = ({
   productPyme,
@@ -26,7 +28,8 @@ const PymeProductInput = ({
 }) => {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [productName, setMonotributoName] = useState('');
-
+  const [modalOpen2, setModalOpen2] = useState(false);
+  const [tooltipOpen2, setTooltipOpen2] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [productList, setMonotributoList] = useState([]);
 
@@ -37,7 +40,7 @@ const PymeProductInput = ({
   });
 
   const { newAlert, newActivity } = useContext(AlertsContext);
-  const { axiosGetQuery, axiosPost } = useContext(ActionsBackend);
+  const { axiosGetQuery, axiosPost, axiosDelete } = useContext(ActionsBackend);
 
   const createProductPyme = async () => {
     const data = {
@@ -68,6 +71,20 @@ const PymeProductInput = ({
     );
     if (!response.error) {
       setMonotributoList(response.data);
+    } else {
+      newAlert('danger', 'Hubo un error!', 'Error: ' + response.errorMsg);
+    }
+  };
+
+  const deleteProductPyme = async (clientTypeId) => {
+    const response = await axiosDelete(
+      API_ROUTES.productPymeDir.productPyme,
+      clientTypeId,
+    );
+    if (!response.error) {
+      newAlert('success', 'Tipo borrado!', 'El tipo ha sido borrado con éxito');
+      newActivity('El usuario ha borrado un tipo de cliente');
+      getProductTypeList();
     } else {
       newAlert('danger', 'Hubo un error!', 'Error: ' + response.errorMsg);
     }
@@ -120,10 +137,10 @@ const PymeProductInput = ({
             >
               <option value={false}>Seleccione el producto Pyme...</option>
               {productList.length > 0 &&
-                productList.map((team, index) => {
+                productList.map((product, index) => {
                   return (
-                    <option key={index} value={team.id}>
-                      {team.name}
+                    <option key={index} value={product.id}>
+                      {product.name}
                     </option>
                   );
                 })}
@@ -143,6 +160,23 @@ const PymeProductInput = ({
                 toggle={() => setTooltipOpen(!tooltipOpen)}
               >
                 Agregar más productos Pyme
+              </Tooltip>
+            </InputGroupAddon>
+            <InputGroupAddon addonType="append">
+              <Button
+                id="deleteClientTypesBtn"
+                color="danger"
+                onClick={() => setModalOpen2(true)}
+              >
+                {<i className="fas fa-trash"></i>}
+              </Button>
+              <Tooltip
+                placement="top"
+                isOpen={tooltipOpen2}
+                target="deleteClientTypesBtn"
+                toggle={() => setTooltipOpen2(!tooltipOpen2)}
+              >
+                Eliminar Tipos
               </Tooltip>
             </InputGroupAddon>
           </InputGroup>
@@ -175,6 +209,40 @@ const PymeProductInput = ({
             Crear producto Pyme
           </Button>
         </ModalBody>
+      </Modal>
+      <Modal
+        isOpen={modalOpen2}
+        toggle={() => setModalOpen2(!modalOpen2)}
+        size="lg"
+      >
+        <ModalHeader>
+          <h3>Borrar Tipos de Cliente</h3>
+        </ModalHeader>
+        <ModalBody>
+          <TableList titlesArray={['Nombre', 'Descripción', '']}>
+            {productList.map((product, index) => {
+              return (
+                <tr key={index}>
+                  <td style={{ textAlign: 'center' }}>{product.name}</td>
+                  <td style={{ textAlign: 'center' }}>{product.description}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    <Button
+                      color="danger"
+                      onClick={() => deleteProductPyme(product.id)}
+                    >
+                      {<i className="fas fa-trash"></i>}
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
+          </TableList>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="danger" onClick={() => setModalOpen2(false)}>
+            Cerrar
+          </Button>
+        </ModalFooter>
       </Modal>
     </>
   );

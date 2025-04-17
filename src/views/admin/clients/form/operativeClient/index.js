@@ -32,7 +32,6 @@ import {
 } from '../../../../../function/rankingsCalc';
 import MonotributistaInput from './components/monotributista';
 import GrossIncomeInput from './components/grossIncome';
-import ServiceTypeInput from './components/serviceType';
 import InputSearch from '../../../../../components/Search/InputSearch';
 
 const OperativeClientsForm = ({
@@ -81,6 +80,11 @@ const OperativeClientsForm = ({
   const [bornDate, setBornDate] = useState(
     operativeClientInfo ? operativeClientInfo.born_date : '',
   );
+
+  const [date, setDate] = useState(
+    operativeClientInfo ? operativeClientInfo.date : '',
+  );
+
   const [clientType, setClientType] = useState(
     operativeClientInfo ? operativeClientInfo.client_type_id : 0,
   );
@@ -182,12 +186,6 @@ const OperativeClientsForm = ({
         },
   );
 
-  const [serviceSelected, setServiceSelected] = useState(
-    operativeClientInfo.service_type_id
-      ? operativeClientInfo.service_type_id
-      : false,
-  );
-
   const [userList, setUserList] = useState([]);
   const [userTax, setUserTax] = useState(
     operativeClientInfo.operative_taxes_user_id
@@ -250,7 +248,6 @@ const OperativeClientsForm = ({
       //ProdPyme
       gross_income_id: grossIncome.grossIncomeId,
       monotributo_type_id: monotributista.monotributoTypeId,
-      service_type_id: serviceSelected,
       social_security: socialSecurity.socialSecurity,
       domestic_service: domesticService.domesticService,
       operative_taxes_user_id: userTax.id,
@@ -285,7 +282,7 @@ const OperativeClientsForm = ({
       );
     }
   };
-
+  console.log('balance :>> ', balance);
   const downloadTaxProof = async () => {
     const dataPost = [{ documentNumber }, { isMono }];
     const response = await axiosQueryFile(
@@ -509,7 +506,7 @@ const OperativeClientsForm = ({
               </Col>
             </Row>
             <Row>
-              <Col md="4">
+              <Col md="3">
                 <FormGroup>
                   <Label for="personTypeSelect">Tipo de persona</Label>
                   <Input
@@ -528,7 +525,7 @@ const OperativeClientsForm = ({
                   <Label for="businessNameTxt">
                     {isLegalPerson
                       ? 'Fecha Contrato Social'
-                      : 'Fecha Nacimieno'}
+                      : 'Fecha Nacimiento'}
                   </Label>
                   <Input
                     type="date"
@@ -540,9 +537,23 @@ const OperativeClientsForm = ({
                   />
                 </FormGroup>
               </Col>
+              <Col md="3">
+                <FormGroup>
+                  <Label for="dateTxt">Fecha de alta</Label>
+                  <Input
+                    type="date"
+                    id="dateTxt"
+                    placeholder="Fecha..."
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                  />
+                </FormGroup>
+              </Col>
               <ClientTypeInput
                 clientType={clientType}
                 setClientType={setClientType}
+                col={3}
               />
             </Row>
             <div
@@ -563,23 +574,16 @@ const OperativeClientsForm = ({
                 {productPyme.isProductPyme && (
                   <>
                     <TeamInput
-                      colSize={4}
+                      colSize={3}
                       teamId={teamId}
                       setTeamId={setTeamId}
                     />
                     <DivisionInput
-                      colSize={4}
+                      colSize={3}
                       divisionId={division}
                       setDivisionId={setDivision}
                     />
-                  </>
-                )}
-              </Row>
-
-              {productPyme.isProductPyme && (
-                <>
-                  <Row>
-                    <Col md="4">
+                    <Col md="2">
                       <FormGroup>
                         <Label for="teamName">Rancking IVA</Label>
                         <Input
@@ -591,6 +595,13 @@ const OperativeClientsForm = ({
                         />
                       </FormGroup>
                     </Col>
+                  </>
+                )}
+              </Row>
+
+              {productPyme.isProductPyme && (
+                <>
+                  <Row>
                     <GrossIncomeInput
                       grossIncome={grossIncome}
                       setGrossIncome={setGrossIncome}
@@ -601,144 +612,6 @@ const OperativeClientsForm = ({
                       setMonotributoType={setMonotributista}
                       colSize={4}
                     />
-                  </Row>
-                  <Row>
-                    <Col md="4">
-                      <FormGroup>
-                        <Label for="balanceBool">Presenta 931</Label>
-                        <InputGroup>
-                          <InputGroupAddon addonType="prepend">
-                            <Button
-                              color={
-                                socialSecurity.hasSocialSecurity
-                                  ? 'success'
-                                  : 'danger'
-                              }
-                              onClick={() =>
-                                setSocialSecurity({
-                                  ...socialSecurity,
-                                  hasSocialSecurity:
-                                    !socialSecurity.hasSocialSecurity,
-                                })
-                              }
-                            >
-                              {socialSecurity.hasSocialSecurity ? 'Si' : 'No'}
-                            </Button>
-                          </InputGroupAddon>
-                          <Input
-                            style={{
-                              paddingLeft: '10px',
-                              paddingRight: '10px',
-                              border: '1px solid',
-                            }}
-                            type="number"
-                            name="socialSecurityRank"
-                            id="socialSecurityRankTxt"
-                            placeholder="Nomina 931..."
-                            disabled={!socialSecurity.hasSocialSecurity}
-                            onChange={(e) =>
-                              setSocialSecurity({
-                                ...socialSecurity,
-                                socialSecurity: e.target.value,
-                              })
-                            }
-                            value={socialSecurity.socialSecurity}
-                          />
-                          <Input
-                            style={{
-                              paddingLeft: '10px',
-                              paddingRight: '10px',
-                              border: '1px solid',
-                            }}
-                            type="number"
-                            name="socialSecurityRank"
-                            id="socialSecurityRankTxt"
-                            placeholder="Ranking 931..."
-                            value={socialSecurityRankingsCalc(
-                              documentNumber,
-                            ).toString()}
-                            disabled
-                          />
-                        </InputGroup>
-                      </FormGroup>
-                    </Col>
-                    <Col md="4">
-                      <FormGroup>
-                        <Label for="balanceBool">Servicio Domestico</Label>
-                        <InputGroup>
-                          <InputGroupAddon addonType="prepend">
-                            <Button
-                              color={
-                                domesticService.hasSocialSecurity
-                                  ? 'success'
-                                  : 'danger'
-                              }
-                              onClick={() =>
-                                setDomesticService({
-                                  ...domesticService,
-                                  hasDomesticService:
-                                    !domesticService.hasDomesticService,
-                                })
-                              }
-                            >
-                              {domesticService.hasDomesticService ? 'Si' : 'No'}
-                            </Button>
-                          </InputGroupAddon>
-                          <Input
-                            style={{
-                              paddingLeft: '10px',
-                              paddingRight: '10px',
-                              border: '1px solid',
-                            }}
-                            type="number"
-                            name="domesticServiceRank"
-                            id="domesticServiceRankTxt"
-                            placeholder="Nomina 931..."
-                            disabled={!domesticService.hasDomesticService}
-                            onChange={(e) =>
-                              setDomesticService({
-                                ...domesticService,
-                                domesticService: e.target.value,
-                              })
-                            }
-                            value={domesticService.domesticService}
-                          />
-                          <Input
-                            style={{
-                              paddingLeft: '10px',
-                              paddingRight: '10px',
-                              border: '1px solid',
-                            }}
-                            type="number"
-                            name="domesticServiceRank"
-                            id="domesticServiceRankTxt"
-                            placeholder="Ranking Servicio Somestico..."
-                            value={domesticRankingsCalc(
-                              documentNumber,
-                            ).toString()}
-                            disabled
-                          />
-                        </InputGroup>
-                      </FormGroup>
-                    </Col>
-                    <ServiceTypeInput
-                      serviceSelected={serviceSelected}
-                      setServiceSelected={setServiceSelected}
-                      colSize={4}
-                    />
-                  </Row>
-                  <Row>
-                    <Col md="4">
-                      <InputSearch
-                        itemsList={userList}
-                        itemSelected={userDomestic}
-                        title={'Responsable Dometica'}
-                        placeholderInput={'Busque un usuario...'}
-                        getNameFn={(user) => `${user.name} ${user.lastname}`}
-                        setItemSelected={setUserDomestic}
-                        searchFn={clientSearchFn}
-                      />
-                    </Col>
                     <Col md="4">
                       <InputSearch
                         itemsList={userList}
@@ -750,23 +623,200 @@ const OperativeClientsForm = ({
                         searchFn={clientSearchFn}
                       />
                     </Col>
-                    <Col md="4">
-                      <InputSearch
-                        itemsList={userList}
-                        itemSelected={userOnboard}
-                        title={'Responsable Onboard'}
-                        placeholderInput={'Busque un usuario...'}
-                        getNameFn={(user) => `${user.name} ${user.lastname}`}
-                        setItemSelected={setUserOnboard}
-                        searchFn={clientSearchFn}
-                      />
+                  </Row>
+                  <Row>
+                    <Col md="6">
+                      <Row
+                        style={{
+                          border: '1px solid #e8eaed',
+                          padding: '10px',
+                          borderRadius: '5px',
+                          marginBottom: '20px',
+                          marginLeft: '20px',
+                          marginRight: '20px',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <Col md="4">
+                          <FormGroup>
+                            <Label for="balanceBool">Presenta 931</Label>
+                            <InputGroup>
+                              <InputGroupAddon addonType="prepend">
+                                <Button
+                                  color={
+                                    socialSecurity.hasSocialSecurity
+                                      ? 'success'
+                                      : 'danger'
+                                  }
+                                  onClick={() =>
+                                    setSocialSecurity({
+                                      ...socialSecurity,
+                                      hasSocialSecurity:
+                                        !socialSecurity.hasSocialSecurity,
+                                    })
+                                  }
+                                >
+                                  {socialSecurity.hasSocialSecurity
+                                    ? 'Si'
+                                    : 'No'}
+                                </Button>
+                              </InputGroupAddon>
+                              <Input
+                                style={{
+                                  paddingLeft: '10px',
+                                  paddingRight: '10px',
+                                  border: '1px solid',
+                                }}
+                                type="number"
+                                name="socialSecurityRank"
+                                id="socialSecurityRankTxt"
+                                placeholder="Nomina 931..."
+                                disabled={!socialSecurity.hasSocialSecurity}
+                                onChange={(e) =>
+                                  setSocialSecurity({
+                                    ...socialSecurity,
+                                    socialSecurity: e.target.value,
+                                  })
+                                }
+                                value={socialSecurity.socialSecurity}
+                              />
+                            </InputGroup>
+                          </FormGroup>
+                        </Col>
+                        <Col md="3">
+                          <FormGroup>
+                            <Label>Ranking</Label>
+                            <Input
+                              style={{
+                                paddingLeft: '10px',
+                                paddingRight: '10px',
+                                border: '1px solid',
+                              }}
+                              type="number"
+                              name="socialSecurityRank"
+                              id="socialSecurityRankTxt"
+                              placeholder="Ranking 931..."
+                              value={socialSecurityRankingsCalc(
+                                documentNumber,
+                              ).toString()}
+                              disabled
+                            />
+                          </FormGroup>
+                        </Col>
+                        <Col md="5">
+                          <InputSearch
+                            itemsList={userList}
+                            itemSelected={userOnboard}
+                            title={'Responsable Laboral'}
+                            placeholderInput={'Busque un usuario...'}
+                            getNameFn={(user) =>
+                              `${user.name} ${user.lastname}`
+                            }
+                            setItemSelected={setUserOnboard}
+                            searchFn={clientSearchFn}
+                          />
+                        </Col>
+                      </Row>
+                    </Col>
+                    <Col md="6">
+                      <Row
+                        style={{
+                          border: '1px solid #e8eaed',
+                          padding: '10px',
+                          borderRadius: '5px',
+                          marginBottom: '20px',
+                          marginLeft: '20px',
+                          marginRight: '20px',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <Col md="4">
+                          <FormGroup>
+                            <Label for="balanceBool">Servicio Domestico</Label>
+                            <InputGroup>
+                              <InputGroupAddon addonType="prepend">
+                                <Button
+                                  color={
+                                    domesticService.hasDomesticService
+                                      ? 'success'
+                                      : 'danger'
+                                  }
+                                  onClick={() =>
+                                    setDomesticService({
+                                      ...domesticService,
+                                      hasDomesticService:
+                                        !domesticService.hasDomesticService,
+                                    })
+                                  }
+                                >
+                                  {domesticService.hasDomesticService
+                                    ? 'Si'
+                                    : 'No'}
+                                </Button>
+                              </InputGroupAddon>
+                              <Input
+                                style={{
+                                  paddingLeft: '10px',
+                                  paddingRight: '10px',
+                                  border: '1px solid',
+                                }}
+                                type="number"
+                                name="domesticServiceRank"
+                                id="domesticServiceRankTxt"
+                                placeholder="Nomina 931..."
+                                disabled={!domesticService.hasDomesticService}
+                                onChange={(e) =>
+                                  setDomesticService({
+                                    ...domesticService,
+                                    domesticService: e.target.value,
+                                  })
+                                }
+                                value={domesticService.domesticService}
+                              />
+                            </InputGroup>
+                          </FormGroup>
+                        </Col>
+                        <Col md="3">
+                          <FormGroup>
+                            <Label>Ranking</Label>
+                            <Input
+                              style={{
+                                paddingLeft: '10px',
+                                paddingRight: '10px',
+                                border: '1px solid',
+                              }}
+                              type="number"
+                              name="domesticServiceRank"
+                              id="domesticServiceRankTxt"
+                              placeholder="Ranking Servicio Somestico..."
+                              value={domesticRankingsCalc(
+                                documentNumber,
+                              ).toString()}
+                              disabled
+                            />
+                          </FormGroup>
+                        </Col>
+                        <Col md="5">
+                          <InputSearch
+                            itemsList={userList}
+                            itemSelected={userDomestic}
+                            title={'Responsable Dometica'}
+                            placeholderInput={'Busque un usuario...'}
+                            getNameFn={(user) =>
+                              `${user.name} ${user.lastname}`
+                            }
+                            setItemSelected={setUserDomestic}
+                            searchFn={clientSearchFn}
+                          />
+                        </Col>
+                      </Row>
                     </Col>
                   </Row>
                 </>
               )}
             </div>
             <Row>
-              <Col md="6">
+              <Col md="4">
                 <div
                   style={{
                     border: '1px solid #e8eaed',
@@ -776,7 +826,7 @@ const OperativeClientsForm = ({
                   }}
                 >
                   <Row>
-                    <Col md="6">
+                    <Col md="4">
                       <FormGroup>
                         <Label for="balanceBool">Producto Riesgo</Label>
                         <Input
@@ -794,7 +844,7 @@ const OperativeClientsForm = ({
                     {risk === 'true' ? (
                       <TeamInput
                         title={'Equipo Riesgo'}
-                        colSize={6}
+                        colSize={8}
                         teamId={team_risk_id}
                         setTeamId={setTeam_risk_id}
                       />
@@ -804,7 +854,7 @@ const OperativeClientsForm = ({
                   </Row>
                 </div>
               </Col>
-              <Col md="6">
+              <Col md="8">
                 <div
                   style={{
                     border: '1px solid #e8eaed',
@@ -814,7 +864,7 @@ const OperativeClientsForm = ({
                   }}
                 >
                   <Row>
-                    <Col md="6">
+                    <Col md="5">
                       <FormGroup>
                         <Label for="balanceBool">Presenta Balance</Label>
                         <InputGroup>
@@ -855,12 +905,38 @@ const OperativeClientsForm = ({
                       </FormGroup>
                     </Col>
                     {balance && (
-                      <TeamInput
-                        title={'Equipo Balance'}
-                        colSize={6}
-                        teamId={team_balance_id}
-                        setTeamId={setTeam_balance_id}
-                      />
+                      <>
+                        <TeamInput
+                          title={'Equipo Balance'}
+                          colSize={4}
+                          teamId={team_balance_id}
+                          setTeamId={setTeam_balance_id}
+                        />
+                        <Col md="3">
+                          <FormGroup>
+                            <Label>Ranking</Label>
+                            <Input
+                              style={{
+                                paddingLeft: '10px',
+                                paddingRight: '10px',
+                                border: '1px solid',
+                              }}
+                              type="number"
+                              name="BalanceRank"
+                              id="BalanceRankTxt"
+                              placeholder="Ranking Balance..."
+                              value={
+                                balance
+                                  ? parseInt(balanceClose) > 7
+                                    ? parseInt(balanceClose) + 5 - 12
+                                    : parseInt(balanceClose) + 5
+                                  : 0
+                              }
+                              disabled
+                            />
+                          </FormGroup>
+                        </Col>
+                      </>
                     )}
                   </Row>
                 </div>
